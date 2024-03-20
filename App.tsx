@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, FlatList, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, TextInput, Button, FlatList, Text, StyleSheet, SafeAreaView, Keyboard } from 'react-native';
 import SQLite from 'react-native-sqlite-storage';
 
 const db = SQLite.openDatabase(
@@ -12,11 +12,30 @@ const db = SQLite.openDatabase(
 );
 
 const App = () => {
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [manufacturer, setManufacturer] = useState('');
   const [calories, setCalories] = useState('');
   const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', (e) => {
+      // Get keyboard height and adjust container
+      setKeyboardOffset(e.endCoordinates.height);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      // Reset offset when keyboard is hidden
+      setKeyboardOffset(0);
+    });
+
+    // Cleanup on component unmount
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     db.transaction((tx) => {
@@ -113,12 +132,57 @@ const App = () => {
           </View>
         )}
       />
+      <View style={[styles.buttonContainer, {bottom: 20 + keyboardOffset}]}>
+        <Button
+          title="Settings"
+          onPress={() => navigation.navigate('Settings')}
+        />
+        <View style={styles.spacer} />
+        <Button
+          title="Details"
+          onPress={() => navigation.navigate('Details')}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   // Add your styles here
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    position: 'absolute',
+  },
+  spacer: {
+    width: 20,
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 50,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '80%',
+    marginBottom: 10,
+    padding: 10,
+  },
+  item: {
+    backgroundColor: '#9cf7f6',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    width: '100%'
+  },
+  title: {
+    fontSize: 24,
+  },
 });
 
 export default App;
