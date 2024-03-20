@@ -1,118 +1,173 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { View, TextInput, Button, FlatList, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+// Визначення типів для параметрів наших екранів
+type RootStackParamList = {
+  Home: undefined;
+  Details: undefined;
+  Settings: undefined;
+};
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
+interface ListItem {
+  id: string;
   title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type DetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Details'>;
+type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
+
+interface DetailsScreenProps {
+  navigation: DetailsScreenNavigationProp;
+}
+
+interface SettingsScreenProps {
+  navigation: SettingsScreenNavigationProp;
+}
+
+const Stack = createNativeStackNavigator();
+
+// Основний компонент списку
+function HomeScreen({ navigation }: HomeScreenProps) {
+  const [inputText, setInputText] = useState('');
+  const [list, setList] = useState<ListItem[]>([]);
+
+  const handleAddPress = () => {
+    setList([...list, { id: Date.now().toString(), title: inputText }]);
+    setInputText('');
   };
 
+  const renderItem = ({ item }: { item: ListItem }) => (
+    <View style={styles.item}>
+      <Text style={styles.title}>{item.title}</Text>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <SafeAreaView style={styles.container}>
+      <TextInput
+        style={styles.input}
+        onChangeText={setInputText}
+        value={inputText}
+        placeholder="Input text"
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      <Button
+        title="Add item"
+        onPress={handleAddPress}
+      />
+      <FlatList
+        data={list}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+      />
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Settings"
+          onPress={() => navigation.navigate('Settings')}
+        />
+        <View style={styles.spacer} />
+        <Button
+          title="Details"
+          onPress={() => navigation.navigate('Details')}
+        />
+  </View>
     </SafeAreaView>
   );
 }
 
+// Екран налаштувань
+function DetailsScreen({ navigation }: DetailsScreenProps) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Details Screen</Text>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Home"
+          onPress={() => navigation.navigate('Home')}
+        />
+        <Button
+          title="Settings"
+          onPress={() => navigation.navigate('Settings')}
+        />
+      </View>
+    </View>
+  );
+}
+
+// Екран інформації
+function SettingsScreen({ navigation }: SettingsScreenProps) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Settings Screen</Text>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Home"
+          onPress={() => navigation.navigate('Home')}
+        />
+        <Button
+          title="Details"
+          onPress={() => navigation.navigate('Details')}
+        />
+      </View>
+    </View>
+  );
+}
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Home Screen' }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+        <Stack.Screen name="Details" component={DetailsScreen} options={{ title: 'Details' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 50,
   },
-  sectionTitle: {
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '80%',
+    marginBottom: 10,
+    padding: 10,
+  },
+  item: {
+    backgroundColor: '#9cf7f6',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
+  title: {
     fontSize: 24,
-    fontWeight: '600',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    position: 'absolute',
+    bottom: 20,
   },
-  highlight: {
-    fontWeight: '700',
+  spacer: {
+    width: 10, // Або більше, залежно від того, скільки простору ви хочете
   },
 });
 
 export default App;
+
