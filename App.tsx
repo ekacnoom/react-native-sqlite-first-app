@@ -1,6 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, FlatList, Text, StyleSheet, SafeAreaView, Keyboard } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StackNavigationProp } from '@react-navigation/stack';
 import SQLite from 'react-native-sqlite-storage';
+
+// Визначення типів для параметрів наших екранів
+type RootStackParamList = {
+  Home: undefined;
+  Details: undefined;
+  Settings: undefined;
+};
+
+interface ListItem {
+  id: string;
+  title: string;
+}
+
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type DetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Details'>;
+type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
+
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
+
+interface DetailsScreenProps {
+  navigation: DetailsScreenNavigationProp;
+}
+
+interface SettingsScreenProps {
+  navigation: SettingsScreenNavigationProp;
+}
+
+const Stack = createNativeStackNavigator();
 
 const db = SQLite.openDatabase(
   {
@@ -11,7 +44,8 @@ const db = SQLite.openDatabase(
   error => { console.log(error); }
 );
 
-const App = () => {
+// Основний компонент списку
+function HomeScreen({ navigation }: HomeScreenProps) {
   const [keyboardOffset, setKeyboardOffset] = useState(0);
 
   const [productName, setProductName] = useState('');
@@ -132,7 +166,7 @@ const App = () => {
           </View>
         )}
       />
-      <View style={[styles.buttonContainer, {bottom: 20 + keyboardOffset}]}>
+      <View style={styles.buttonContainer}>
         <Button
           title="Settings"
           onPress={() => navigation.navigate('Settings')}
@@ -142,23 +176,62 @@ const App = () => {
           title="Details"
           onPress={() => navigation.navigate('Details')}
         />
-      </View>
+  </View>
     </SafeAreaView>
   );
-};
+}
+
+// Екран налаштувань
+function DetailsScreen({ navigation }: DetailsScreenProps) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Details Screen</Text>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Home"
+          onPress={() => navigation.navigate('Home')}
+        />
+        <Button
+          title="Settings"
+          onPress={() => navigation.navigate('Settings')}
+        />
+      </View>
+    </View>
+  );
+}
+
+// Екран інформації
+function SettingsScreen({ navigation }: SettingsScreenProps) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Settings Screen</Text>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Home"
+          onPress={() => navigation.navigate('Home')}
+        />
+        <Button
+          title="Details"
+          onPress={() => navigation.navigate('Details')}
+        />
+      </View>
+    </View>
+  );
+}
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Home Screen' }} />
+        <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+        <Stack.Screen name="Details" component={DetailsScreen} options={{ title: 'Details' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
 const styles = StyleSheet.create({
-  // Add your styles here
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 20,
-    position: 'absolute',
-  },
-  spacer: {
-    width: 20,
-  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -178,11 +251,22 @@ const styles = StyleSheet.create({
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 16,
-    width: '100%'
   },
   title: {
     fontSize: 24,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    position: 'absolute',
+    bottom: 20,
+  },
+  spacer: {
+    width: 10, // Або більше, залежно від того, скільки простору ви хочете
+  },
 });
 
 export default App;
+
