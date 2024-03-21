@@ -1,3 +1,4 @@
+// Import necessary libraries and components
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, FlatList, Text, StyleSheet, SafeAreaView, Keyboard } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -5,16 +6,19 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StackNavigationProp } from '@react-navigation/stack';
 import SQLite from 'react-native-sqlite-storage';
 
+// Define the navigation stack parameters for the app
 type RootStackParamList = {
   Home: undefined;
   Details: undefined;
   Settings: undefined;
 };
 
+// Define navigation prop types for each screen
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 type DetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Details'>;
 type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
 
+// Define props interfaces for the screens
 interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
 }
@@ -27,8 +31,10 @@ interface SettingsScreenProps {
   navigation: SettingsScreenNavigationProp;
 }
 
+// Create a stack navigator
 const Stack = createNativeStackNavigator();
 
+// Open a SQLite database to store product data
 const db = SQLite.openDatabase(
   {
     name: 'ProductsDB',
@@ -38,24 +44,23 @@ const db = SQLite.openDatabase(
   error => { console.log(error); }
 );
 
-// Main component
+// Home screen component
 function HomeScreen({ navigation }: HomeScreenProps) {
+  // State variables to handle input and products list
   const [keyboardOffset, setKeyboardOffset] = useState(0);
-
   const [productName, setProductName] = useState('');
   const [price, setPrice] = useState('');
   const [manufacturer, setManufacturer] = useState('');
   const [calories, setCalories] = useState('');
   const [products, setProducts] = useState([]);
 
+  // Keyboard event listeners to adjust the UI when keyboard is visible
   useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', (e) => {
-      // Get keyboard height and adjust container
-      setKeyboardOffset(e.endCoordinates.height);
+      setKeyboardOffset(e.endCoordinates.height); // Adjust UI based on keyboard height
     });
     const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-      // Reset offset when keyboard is hidden
-      setKeyboardOffset(0);
+      setKeyboardOffset(0); // Reset UI adjustment when keyboard hides
     });
 
     // Cleanup on component unmount
@@ -65,6 +70,7 @@ function HomeScreen({ navigation }: HomeScreenProps) {
     };
   }, []);
 
+  // Initialize the products table in the database and update the products list
   useEffect(() => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -78,6 +84,7 @@ function HomeScreen({ navigation }: HomeScreenProps) {
     updateProductsList();
   }, []);
 
+  // Function to add a new product to the database
   const addProduct = () => {
     if (!productName || !price || !manufacturer || !calories) {
       alert('Please fill all fields');
@@ -102,6 +109,7 @@ function HomeScreen({ navigation }: HomeScreenProps) {
     });
   };
 
+  // Function to fetch the updated products list from the database
   const updateProductsList = () => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -116,6 +124,7 @@ function HomeScreen({ navigation }: HomeScreenProps) {
     });
   };
 
+  // Render the UI components for the Home screen
   return (
     <SafeAreaView style={styles.container}>
       <TextInput
@@ -175,7 +184,7 @@ function HomeScreen({ navigation }: HomeScreenProps) {
   );
 }
 
-// Settings screen
+// Details screen component with navigation buttons
 function DetailsScreen({ navigation }: DetailsScreenProps) {
   return (
     <View style={styles.container}>
@@ -194,7 +203,7 @@ function DetailsScreen({ navigation }: DetailsScreenProps) {
   );
 }
 
-// Info screen
+// Settings screen component with navigation buttons
 function SettingsScreen({ navigation }: SettingsScreenProps) {
   return (
     <View style={styles.container}>
@@ -213,6 +222,7 @@ function SettingsScreen({ navigation }: SettingsScreenProps) {
   );
 }
 
+// Main App component setup with navigation container
 function App() {
   return (
     <NavigationContainer>
@@ -225,6 +235,7 @@ function App() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
