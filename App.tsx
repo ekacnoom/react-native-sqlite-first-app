@@ -203,8 +203,20 @@ function DetailsScreen({ navigation }: DetailsScreenProps) {
   );
 }
 
-// Settings screen component with navigation buttons
+// Settings screen component with navigation buttons and data deletion functionality
 function SettingsScreen({ navigation }: SettingsScreenProps) {
+  // Function to delete all products from the database
+  const deleteAllProducts = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "DELETE FROM Products",
+        [],
+        () => { console.log('All products deleted successfully'); }, // Success callback
+        error => { console.log('Error deleting products'); console.log(error); } // Error callback
+      );
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings Screen</Text>
@@ -217,10 +229,17 @@ function SettingsScreen({ navigation }: SettingsScreenProps) {
           title="Details"
           onPress={() => navigation.navigate('Details')}
         />
+        {/* Additional Button for deleting all products */}
+        <Button
+          title="Delete All Products"
+          onPress={deleteAllProducts}
+          color="red" // Optional: change button color to indicate a destructive action
+        />
       </View>
     </View>
   );
 }
+
 
 // Main App component setup with navigation container
 function App() {
