@@ -5,17 +5,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StackNavigationProp } from '@react-navigation/stack';
 import SQLite from 'react-native-sqlite-storage';
 
-// Визначення типів для параметрів наших екранів
 type RootStackParamList = {
   Home: undefined;
   Details: undefined;
   Settings: undefined;
 };
-
-interface ListItem {
-  id: string;
-  title: string;
-}
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 type DetailsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Details'>;
@@ -44,7 +38,7 @@ const db = SQLite.openDatabase(
   error => { console.log(error); }
 );
 
-// Основний компонент списку
+// Main component
 function HomeScreen({ navigation }: HomeScreenProps) {
   const [keyboardOffset, setKeyboardOffset] = useState(0);
 
@@ -181,7 +175,7 @@ function HomeScreen({ navigation }: HomeScreenProps) {
   );
 }
 
-// Екран налаштувань
+// Settings screen
 function DetailsScreen({ navigation }: DetailsScreenProps) {
   return (
     <View style={styles.container}>
@@ -200,7 +194,7 @@ function DetailsScreen({ navigation }: DetailsScreenProps) {
   );
 }
 
-// Екран інформації
+// Info screen
 function SettingsScreen({ navigation }: SettingsScreenProps) {
   return (
     <View style={styles.container}>
@@ -264,7 +258,7 @@ const styles = StyleSheet.create({
     bottom: 20,
   },
   spacer: {
-    width: 10, // Або більше, залежно від того, скільки простору ви хочете
+    width: 10,
   },
 });
 
